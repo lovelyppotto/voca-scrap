@@ -40,19 +40,24 @@
       antonym: '',
     };
 
-    // 표제어
-    result.word =
+    // 표제어 (·는 사전 음절 구분자라 제거)
+    result.word = (
       getText(document.querySelector('strong.word .u_word_dic')) ||
       getText(document.querySelector('strong.word')) ||
       getText(document.querySelector('.word_num_wrap .word')) ||
       getText(document.querySelector('h2.entry-title')) ||
       getText(document.querySelector('.entry_word')) ||
-      getText(document.querySelector('.word_type1_header .word'));
+      getText(document.querySelector('.word_type1_header .word'))
+    ).replace(/·/g, '');
 
-    // 발음
-    const pronEls = document.querySelectorAll('.phonetic_wrap .phonetic, .listen_list .listen_item .phonetic');
-    if (pronEls.length) {
-      result.pronunciation = getTexts(pronEls).join(' / ');
+    // 발음 (미국식 우선, 없으면 첫 번째 발음)
+    const pronEl = document.querySelector('span.pronounce, .phonetic_wrap .phonetic');
+    if (pronEl) {
+      const pronText = getText(pronEl);
+      const usMatch = pronText.match(/美\s*([^\s\]]+)/);
+      result.pronunciation = usMatch
+        ? usMatch[1]
+        : pronText.replace(/[\[\]]/g, '').split(';')[0].trim();
     }
 
     // 품사 + 의미 (여러 뜻 지원)
@@ -173,14 +178,17 @@
   // ── 탭 형식 변환 ─────────────────────────────
   function toTSV(entry) {
     const cols = [
-      entry.word,
-      entry.meaning,
-      entry.pos,
-      entry.pronunciation,
-      entry.example,
-      entry.derivative,
-      entry.synonym,
-      entry.antonym,
+      entry.word,          // W  단어
+      entry.meaning,       // M  의미
+      entry.pronunciation, // P  발음
+      entry.pos,           // POS 품사
+      entry.example,       // E  예문
+      entry.derivative,    // DER 파생어
+      entry.synonym,       // SIM 유의어
+      '',                  // S  동의어 (수동 입력)
+      entry.antonym,       // A  반의어
+      '',                  // D  설명 (수동 입력)
+      '',                  // C  날짜 (수동 입력)
     ];
     return cols.map(c => (c || '').replace(/\t/g, ' ')).join('\t');
   }
