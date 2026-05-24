@@ -55,34 +55,33 @@
     if (pronEl) {
       const pronText = getText(pronEl);
       const usMatch = pronText.match(/美\s*([^\s\]]+)/);
-      result.pronunciation = usMatch
-        ? usMatch[1]
-        : pronText.replace(/[\[\]]/g, '').split(';')[0].trim();
+      if (usMatch) {
+        result.pronunciation = usMatch[1];
+      } else {
+        const bracketMatch = pronText.match(/\[\s*([^\]]+)\s*\]/);
+        result.pronunciation = bracketMatch ? bracketMatch[1].trim() : '';
+      }
     }
 
-    // 품사 + 의미 (여러 뜻 지원)
+    // 품사
+    const posEls = document.querySelectorAll('em.part_speech.myScrollNavQuick');
+    const posList = [...new Set(getTexts(posEls))];
+    result.pos = posList.map(p => `[${p}]`).join(' ');
+
+    // 의미
+    const meanings = [];
     const meaningBlocks = document.querySelectorAll(
       '.mean_list .mean_item, .lst_means .list_mean, .word_mean_wrap .word_mean'
     );
-
-    const meanings = [];
-    const posList = [];
-
     meaningBlocks.forEach(block => {
-      const pos = getText(block.querySelector('.word_kind, .pos, .part_of_speech'));
       const mean = getText(block.querySelector('.mean, .mean_text, .meaning'));
-      if (pos) posList.push(pos);
       if (mean) meanings.push(mean);
     });
-
-    // fallback: 단순 셀렉터
     if (!meanings.length) {
       const simpleMeans = document.querySelectorAll('.mean_list li .mean, .word_list .mean');
       simpleMeans.forEach(el => meanings.push(getText(el)));
     }
-
     result.meaning = clean(meanings.slice(0, 3).join('; '));
-    result.pos = clean([...new Set(posList)].join(', '));
 
     // 예문
     const exampleEls = document.querySelectorAll(
