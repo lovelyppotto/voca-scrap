@@ -42,6 +42,8 @@
 
     // 표제어
     result.word =
+      getText(document.querySelector('strong.word .u_word_dic')) ||
+      getText(document.querySelector('strong.word')) ||
       getText(document.querySelector('.word_num_wrap .word')) ||
       getText(document.querySelector('h2.entry-title')) ||
       getText(document.querySelector('.entry_word')) ||
