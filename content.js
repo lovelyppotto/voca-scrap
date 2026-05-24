@@ -88,12 +88,21 @@
     }
     result.meaning = clean(meanings.join(', '));
 
-    // 예문
-    const exampleEls = document.querySelectorAll(
-      '.example_wrap .example, .lst_example .example_lst li, .word_example .example'
+    // 예문 - 의미 개수에 맞게 각 mean_item의 첫 번째 예문만 추출
+    const meaningCount = entryMeans.length || meanings.length;
+    const exMeanItems = document.querySelectorAll(
+      'ul._means_level_dictionary > li.my_mean_item > ul > li.my_mean_item'
     );
-    const examples = getTexts(exampleEls).slice(0, 2);
-    result.example = clean(examples.join(' / '));
+    const exampleParts = [];
+    exMeanItems.forEach((item, i) => {
+      if (i >= meaningCount) return;
+      const textEl = item.querySelector('p.origin.my_origin span.text[lang="en"]');
+      if (textEl) {
+        const exText = getText(textEl).trim();
+        if (exText) exampleParts.push((CIRCLED[i] ?? `${i + 1}.`) + ' '+ exText);
+      }
+    });
+    result.example = exampleParts.join(',\n');
 
     // 파생어
     const derivEls = document.querySelectorAll(
@@ -194,7 +203,10 @@
       '',                  // D  설명 (수동 입력)
       '',                  // C  날짜 (수동 입력)
     ];
-    return cols.map(c => (c || '').replace(/\t/g, ' ')).join('\t');
+    return cols.map(c => {
+      const v = (c || '').replace(/\t/g, ' ');
+      return v.includes('\n') || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
+    }).join('\t');
   }
 
   // ── 플로팅 버튼 UI ────────────────────────────
