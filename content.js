@@ -69,19 +69,24 @@
     result.pos = posList.map(p => `[${p}]`).join(' ');
 
     // 의미
+    const CIRCLED = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
     const meanings = [];
-    const meaningBlocks = document.querySelectorAll(
-      '.mean_list .mean_item, .lst_means .list_mean, .word_mean_wrap .word_mean'
-    );
-    meaningBlocks.forEach(block => {
-      const mean = getText(block.querySelector('.mean, .mean_text, .meaning'));
-      if (mean) meanings.push(mean);
-    });
-    if (!meanings.length) {
-      const simpleMeans = document.querySelectorAll('.mean_list li .mean, .word_list .mean');
-      simpleMeans.forEach(el => meanings.push(getText(el)));
+    const entryMeans = document.querySelectorAll('.entry_mean_list .entry_mean_item p.meaning');
+    if (entryMeans.length) {
+      entryMeans.forEach((el, i) => {
+        const text = getText(el);
+        if (text) meanings.push((CIRCLED[i] ?? `${i + 1}.`) + text);
+      });
+    } else {
+      const fallbackBlocks = document.querySelectorAll(
+        '.mean_list .mean_item, .lst_means .list_mean, .word_mean_wrap .word_mean'
+      );
+      fallbackBlocks.forEach((block, i) => {
+        const mean = getText(block.querySelector('.mean, .mean_text, .meaning'));
+        if (mean) meanings.push((CIRCLED[i] ?? `${i + 1}.`) + mean);
+      });
     }
-    result.meaning = clean(meanings.slice(0, 3).join('; '));
+    result.meaning = clean(meanings.join(', '));
 
     // 예문
     const exampleEls = document.querySelectorAll(
