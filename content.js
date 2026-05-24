@@ -178,7 +178,7 @@
         const shortPos = POS_SHORT[pos] ?? pos.slice(0, 1);
         words.forEach(w => derivParts.push(pos ? `[${shortPos}] ${w}` : w));
       });
-      result.derivative = derivParts.join(', ');
+      result.derivative = derivParts.join('; ');
     }
 
     // 유의어 (수동 입력)
