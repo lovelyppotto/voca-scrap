@@ -174,7 +174,7 @@
       derivSection.querySelectorAll('.inner').forEach(inner => {
         const pos = getText(inner.querySelector('em.tit'));
         const words = getTexts(inner.querySelectorAll('.cont .item[lang="en"]'));
-        const POS_SHORT = { '형용사':'형', '명사':'명', '부사':'부', '동사':'동', '대명사':'대', '전치사':'전', '접속사':'접', '감탄사':'감', '관사':'관' };
+        const POS_SHORT = { '형용사':'a', '명사':'n', '부사':'adv', '동사':'v', '대명사':'pron', '전치사':'prep', '접속사':'conj', '감탄사':'int' };
         const shortPos = POS_SHORT[pos] ?? pos.slice(0, 1);
         words.forEach(w => derivParts.push(pos ? `[${shortPos}] ${w}` : w));
       });
