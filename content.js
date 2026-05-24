@@ -20,6 +20,18 @@
   function clean(str) {
     return str.replace(/\t|\n/g, ' ').trim();
   }
+  // 한국어 바이그램 유사도 (예문-의미 매칭용)
+  function korScore(query, target) {
+    const stop = new Set(['하다', '이다', '있다', '없다', '되다', '않다', '주다']);
+    const cq = query.replace(/[^가-힣]/g, '');
+    const ct = target.replace(/[^가-힣]/g, '');
+    let score = 0;
+    for (let i = 0; i < cq.length - 1; i++) {
+      const bg = cq.slice(i, i + 2);
+      if (!stop.has(bg) && ct.includes(bg)) score++;
+    }
+    return score;
+  }
 
   // ── 단어 데이터 추출 ──────────────────────────
 
@@ -63,8 +75,8 @@
       }
     }
 
-    // 품사
-    const posEls = document.querySelectorAll('em.part_speech.myScrollNavQuick');
+    // 품사 (여러 품사 지원, 탭 네비게이션 기준)
+    const posEls = document.querySelectorAll('em.part_speech[nclickcode], em.part_speech.myScrollNavQuick');
     const posList = [...new Set(getTexts(posEls))];
     result.pos = posList.map(p => `[${p}]`).join(' ');
 
@@ -88,19 +100,61 @@
     }
     result.meaning = clean(meanings.join(', '));
 
-    // 예문 - 의미 개수에 맞게 각 mean_item의 첫 번째 예문만 추출
-    const meaningCount = entryMeans.length || meanings.length;
-    const exMeanItems = document.querySelectorAll(
-      'ul._means_level_dictionary > li.my_mean_item > ul > li.my_mean_item'
-    );
+    // 예문 - Oxford 의미와 entry 의미를 바이그램 스코어로 매칭 후 1:1 배정
+    const oxItems = [];
+    document.querySelectorAll('ul._means_level_dictionary > li.my_mean_item > ul > li.my_mean_item').forEach(item => {
+      const meaning = getText(item.querySelector('span.mean[lang="ko"]'));
+      const exEl = item.querySelector('p.origin.my_origin span.text[lang="en"]');
+      // is-closed된 div 안에 있어도 textContent로 읽힘
+      const example = exEl ? exEl.textContent.replace(/\s+/g, ' ').trim() : '';
+      oxItems.push({ meaning, example });
+    });
+
+    // 스코어 매트릭스
+    const scoreList = [];
+    entryMeans.forEach((el, i) => {
+      const txt = getText(el);
+      oxItems.forEach((ox, j) => {
+        scoreList.push({ i, j, s: korScore(txt, ox.meaning) });
+      });
+    });
+
+    // 각 entry가 동점으로 경합하는 oxford 수 계산 (적을수록 대안 없음 → 우선 배정)
+    const entryScoreCount = {};
+    scoreList.forEach(({ i, s }) => {
+      if (!entryScoreCount[i]) entryScoreCount[i] = {};
+      entryScoreCount[i][s] = (entryScoreCount[i][s] || 0) + 1;
+    });
+
+    // score 내림차순 → 대안 수 오름차순(대안 없는 entry 우선) → j 오름차순
+    scoreList.sort((a, b) => {
+      if (a.s !== b.s) return b.s - a.s;
+      const au = entryScoreCount[a.i]?.[a.s] ?? 999;
+      const bu = entryScoreCount[b.i]?.[b.s] ?? 999;
+      if (au !== bu) return au - bu;
+      return a.j - b.j || a.i - b.i;
+    });
+
+    // 그리디 1:1 매칭
+    const assignedE = new Set(), assignedO = new Set();
+    const exMap = {};
+    for (const { i, j } of scoreList) {
+      if (assignedE.has(i) || assignedO.has(j)) continue;
+      exMap[i] = oxItems[j].example;
+      assignedE.add(i);
+      assignedO.add(j);
+    }
+    // 미매칭 항목은 순서대로 남은 Oxford 예문 배정
+    let oxSeq = 0;
+    entryMeans.forEach((_, i) => {
+      if (exMap[i]) return;
+      while (oxSeq < oxItems.length && assignedO.has(oxSeq)) oxSeq++;
+      if (oxSeq < oxItems.length) exMap[i] = oxItems[oxSeq++].example;
+    });
+
     const exampleParts = [];
-    exMeanItems.forEach((item, i) => {
-      if (i >= meaningCount) return;
-      const textEl = item.querySelector('p.origin.my_origin span.text[lang="en"]');
-      if (textEl) {
-        const exText = getText(textEl).trim();
-        if (exText) exampleParts.push((CIRCLED[i] ?? `${i + 1}.`) + ' '+ exText);
-      }
+    entryMeans.forEach((_, i) => {
+      if (exMap[i]) exampleParts.push((CIRCLED[i] ?? `${i + 1}.`) + ' ' + exMap[i]);
     });
     result.example = exampleParts.join(',\n');
 
