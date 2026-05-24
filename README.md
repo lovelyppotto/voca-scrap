@@ -7,7 +7,7 @@
 1. 네이버 영어사전에서 단어를 검색하여 단어 상세페이지에 들어갑니다.
 2. 오른쪽 하단의 버튼으로 단어장에 추가하거나, 해당 단어의 정보만 바로 클립보드에 복사할 수 있습니다.
 <img width="1391" height="1233" alt="image" src="https://github.com/user-attachments/assets/0b3e3dd1-b28f-4b60-a004-aeb13e6f51be" />
-3. 추가된 단어들은 확장프로그램 UI의 전체 복사 기능을 통해 한번에 클립보드에 복사할 수 있습니다.
+3. 단어장에 추가된 단어들은 확장프로그램 UI의 전체 복사 기능을 통해 한번에 클립보드에 복사할 수 있습니다.
    <img width="381" height="622" alt="image" src="https://github.com/user-attachments/assets/4318fced-da70-4315-8747-9b5e1b81a3b1" />
    
 4. 스프레드시트에 그대로 붙여넣기하면 아래와 같이 정보가 붙여넣어집니다
