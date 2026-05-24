@@ -158,17 +158,22 @@
     });
     result.example = exampleParts.join(',\n');
 
-    // 파생어
-    const derivEls = document.querySelectorAll(
-      '.relate_word_wrap .relate_word, .word_relation .relate_list li, .derivative_wrap li'
-    );
-    result.derivative = clean(getTexts(derivEls).slice(0, 5).join(', '));
+    // 파생형 (형용사/명사 등 품사 포함)
+    const derivSection = document.querySelector('#_id_section_relation');
+    if (derivSection) {
+      const derivParts = [];
+      derivSection.querySelectorAll('.inner').forEach(inner => {
+        const pos = getText(inner.querySelector('em.tit'));
+        const words = getTexts(inner.querySelectorAll('.cont .item[lang="en"]'));
+        const POS_SHORT = { '형용사':'형', '명사':'명', '부사':'부', '동사':'동', '대명사':'대', '전치사':'전', '접속사':'접', '감탄사':'감', '관사':'관' };
+        const shortPos = POS_SHORT[pos] ?? pos.slice(0, 1);
+        words.forEach(w => derivParts.push(pos ? `[${shortPos}] ${w}` : w));
+      });
+      result.derivative = derivParts.join(', ');
+    }
 
-    // 유의어
-    const synEls = document.querySelectorAll(
-      '.synonym_wrap li, .word_synonym li, [class*="synonym"] li'
-    );
-    result.synonym = clean(getTexts(synEls).slice(0, 5).join(', '));
+    // 유의어 (수동 입력)
+    result.synonym = '';
 
     // 반의어
     const antEls = document.querySelectorAll(
