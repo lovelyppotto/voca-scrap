@@ -90,7 +90,7 @@
         const text = getText(el);
         if (text && !seenMeanings.has(text)) {
           seenMeanings.add(text);
-          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + text);
+          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + ' ' + text);
         }
       });
     } else {
@@ -102,11 +102,11 @@
         const mean = getText(item.querySelector('span.mean[lang="ko"]'));
         if (mean && !seenFallback.has(mean)) {
           seenFallback.add(mean);
-          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + mean);
+          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + ' ' + mean);
         }
       });
     }
-    result.meaning = clean(meanings.join(', '));
+    result.meaning = clean(meanings.join('; '));
 
     // 예문 - Oxford 의미와 entry 의미를 바이그램 스코어로 매칭 후 1:1 배정
     const oxItems = [];
@@ -118,10 +118,11 @@
       oxItems.push({ meaning, example });
     });
 
-    // 스코어 매트릭스
+    // 스코어 매트릭스 - entryMeans 대신 meanings 배열 기준 (fallback 경로도 커버)
+    const stripNum = s => s.replace(/^[①②③④⑤⑥⑦⑧⑨⑩\d.]+\s*/, '');
     const scoreList = [];
-    entryMeans.forEach((el, i) => {
-      const txt = getText(el);
+    meanings.forEach((m, i) => {
+      const txt = stripNum(m);
       oxItems.forEach((ox, j) => {
         scoreList.push({ i, j, s: korScore(txt, ox.meaning) });
       });
@@ -154,17 +155,17 @@
     }
     // 미매칭 항목은 순서대로 남은 Oxford 예문 배정
     let oxSeq = 0;
-    entryMeans.forEach((_, i) => {
+    meanings.forEach((_, i) => {
       if (exMap[i]) return;
       while (oxSeq < oxItems.length && assignedO.has(oxSeq)) oxSeq++;
       if (oxSeq < oxItems.length) exMap[i] = oxItems[oxSeq++].example;
     });
 
     const exampleParts = [];
-    entryMeans.forEach((_, i) => {
+    meanings.forEach((_, i) => {
       if (exMap[i]) exampleParts.push((CIRCLED[i] ?? `${i + 1}.`) + ' ' + exMap[i]);
     });
-    result.example = exampleParts.join(',\n');
+    result.example = exampleParts.join(';\n');
 
     // 파생형 (형용사/명사 등 품사 포함)
     const derivSection = document.querySelector('#_id_section_relation');
