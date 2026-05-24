@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "네이버 단어장 수집기",
+  "version": "1.0.0",
+  "description": "네이버 사전에서 단어 정보를 스프레드시트 형식으로 수집합니다",
+  "permissions": ["storage", "clipboardWrite", "activeTab"],
+  "host_permissions": [
+    "https://*.dict.naver.com/*",
+    "https://search.naver.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*.dict.naver.com/*", "https://search.naver.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "단어장 수집기"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

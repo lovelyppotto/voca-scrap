@@ -1,0 +1,87 @@
+/* ── 네이버 단어장 수집기 플로팅 버튼 ── */
+#vocab-collector-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.vc-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.vc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+}
+
+.vc-btn:active {
+  transform: translateY(0px);
+}
+
+.vc-add {
+  background: #03C75A;
+  color: #fff;
+}
+
+.vc-add:hover {
+  background: #02b350;
+}
+
+.vc-copy-one {
+  background: #fff;
+  color: #333;
+  border: 1.5px solid #e0e0e0;
+}
+
+.vc-copy-one:hover {
+  background: #f8f8f8;
+  border-color: #ccc;
+}
+
+/* Toast */
+.vc-toast {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  background: #222;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2147483647;
+  max-width: 240px;
+}
+
+.vc-toast--show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vc-toast--ok { background: #1a1a2e; border-left: 3px solid #03C75A; }
+.vc-toast--warn { background: #1a1a2e; border-left: 3px solid #f5a623; }
+.vc-toast--error { background: #1a1a2e; border-left: 3px solid #e74c3c; }

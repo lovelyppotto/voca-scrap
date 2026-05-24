@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>단어장 수집기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e8eaf0;
+      width: 380px;
+      min-height: 200px;
+      max-height: 600px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid #1e2130;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: #03C75A;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 1px;
+    }
+
+    .count-badge {
+      background: #03C75A;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 22px;
+      text-align: center;
+    }
+
+    /* Column header */
+    .col-header {
+      padding: 8px 18px;
+      font-size: 10px;
+      color: #4b5563;
+      background: #0d0f16;
+      border-bottom: 1px solid #1e2130;
+      display: grid;
+      grid-template-columns: 90px 1fr 60px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Word list */
+    .word-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .word-list::-webkit-scrollbar { width: 4px; }
+    .word-list::-webkit-scrollbar-track { background: transparent; }
+    .word-list::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: #4b5563;
+    }
+
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+    .empty-text { font-size: 13px; line-height: 1.6; }
+    .empty-hint { font-size: 11px; margin-top: 8px; color: #374151; }
+
+    .word-item {
+      padding: 10px 18px;
+      border-bottom: 1px solid #1a1d28;
+      display: grid;
+      grid-template-columns: 90px 1fr 60px;
+      gap: 8px;
+      align-items: start;
+      transition: background 0.1s;
+    }
+
+    .word-item:hover { background: #151822; }
+
+    .word-en {
+      font-size: 13px;
+      font-weight: 700;
+      color: #a5f3c0;
+      word-break: break-all;
+    }
+
+    .word-pos {
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .word-mean {
+      font-size: 12px;
+      color: #c8ccd8;
+      line-height: 1.5;
+    }
+
+    .word-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .btn-copy-row {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: #1e2130;
+      color: #9ca3af;
+      border: 1px solid #2a2d3a;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+    .btn-copy-row:hover { background: #03C75A; color: #fff; border-color: #03C75A; }
+
+    .btn-del-row {
+      font-size: 10px;
+      padding: 3px 8px;
+      background: transparent;
+      color: #4b5563;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .btn-del-row:hover { color: #e74c3c; border-color: #e74c3c; }
+
+    /* Footer */
+    .footer {
+      padding: 12px 18px;
+      border-top: 1px solid #1e2130;
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 10px;
+      background: #03C75A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: -0.01em;
+    }
+    .btn-primary:hover { background: #02b350; }
+    .btn-primary:disabled { background: #1e2130; color: #4b5563; cursor: not-allowed; }
+
+    .btn-secondary {
+      padding: 10px 14px;
+      background: #1e2130;
+      color: #9ca3af;
+      border: 1px solid #2a2d3a;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { background: #262a3a; color: #e8eaf0; }
+
+    .btn-danger {
+      padding: 10px 14px;
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #1e2130;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-danger:hover { color: #e74c3c; border-color: #e74c3c; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #1a1a2e;
+      color: #e8eaf0;
+      border-left: 3px solid #03C75A;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      opacity: 0;
+      transition: all 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* CSV preview */
+    .preview-note {
+      padding: 6px 18px 0;
+      font-size: 10px;
+      color: #4b5563;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">📚</div>
+      <div>
+        <div class="title">단어장 수집기</div>
+        <div class="subtitle">네이버 사전 → 스프레드시트</div>
+      </div>
+    </div>
+    <div class="count-badge" id="count-badge">0</div>
+  </div>
+
+  <div class="col-header">
+    <span>단어</span>
+    <span>의미</span>
+    <span></span>
+  </div>
+
+  <div class="word-list" id="word-list">
+    <div class="empty-state">
+      <div class="empty-icon">📖</div>
+      <div class="empty-text">아직 수집된 단어가 없어요</div>
+      <div class="empty-hint">네이버 사전에서 <strong style="color:#9ca3af">+ 추가</strong> 버튼을 눌러보세요</div>
+    </div>
+  </div>
+
+  <div class="preview-note" id="preview-note" style="display:none">
+    헤더 포함 복사: 단어(W) / 의미(M) / 품사(G) / 발음(P) / 예문(E) / 파생어(DER) / 유의어(SIM) / 반의어(A)
+  </div>
+
+  <div class="footer">
+    <button class="btn-primary" id="btn-copy-all" disabled>전체 복사</button>
+    <button class="btn-secondary" id="btn-toggle-header">헤더 포함</button>
+    <button class="btn-danger" id="btn-clear">초기화</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
