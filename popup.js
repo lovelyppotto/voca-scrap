@@ -2,7 +2,7 @@
 // popup.js
 // =============================================
 
-const HEADER_ROW = ['단어(W)', '의미(M)', '품사(G)', '발음(P)', '예문(E)', '파생어(DER)', '유의어(SIM)', '반의어(A)'];
+const HEADER_ROW = ['단어(W)', '의미(M)', '발음(P)', '품사(POS)', '예문(E)', '파생어(DER)', '유의어(SIM)', '동의어(S)', '반의어(A)', '설명(D)', '날짜(C)'];
 
 let includeHeader = false;
 
@@ -17,9 +17,14 @@ const toastEl      = document.getElementById('toast');
 
 // ── 유틸 ─────────────────────────────────────
 function entryToTSV(e) {
-  return [e.word, e.meaning, e.pos, e.pronunciation, e.example, e.derivative, e.synonym, e.antonym]
-    .map(v => (v || '').replace(/\t/g, ' '))
-    .join('\t');
+  const cols = [
+    e.word, e.meaning, e.pronunciation, e.pos,
+    e.example, e.derivative, e.synonym, '', e.antonym, '', '',
+  ];
+  return cols.map(v => {
+    const s = (v || '').replace(/\t/g, ' ');
+    return s.includes('\n') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+  }).join('\t');
 }
 
 function showToast(msg, dur = 2000) {

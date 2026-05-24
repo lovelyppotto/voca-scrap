@@ -85,17 +85,25 @@
     const meanings = [];
     const entryMeans = document.querySelectorAll('.entry_mean_list .entry_mean_item p.meaning');
     if (entryMeans.length) {
-      entryMeans.forEach((el, i) => {
+      const seenMeanings = new Set();
+      entryMeans.forEach((el) => {
         const text = getText(el);
-        if (text) meanings.push((CIRCLED[i] ?? `${i + 1}.`) + text);
+        if (text && !seenMeanings.has(text)) {
+          seenMeanings.add(text);
+          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + text);
+        }
       });
     } else {
-      const fallbackBlocks = document.querySelectorAll(
-        '.mean_list .mean_item, .lst_means .list_mean, .word_mean_wrap .word_mean'
-      );
-      fallbackBlocks.forEach((block, i) => {
-        const mean = getText(block.querySelector('.mean, .mean_text, .meaning'));
-        if (mean) meanings.push((CIRCLED[i] ?? `${i + 1}.`) + mean);
+      // entry_mean_list가 없을 때 Oxford 본문 영역으로 범위 제한
+      const mainSection = document.querySelector('.mean_tray.important_words, .component_mean.important_words');
+      const scope = mainSection || document;
+      const seenFallback = new Set();
+      scope.querySelectorAll('ul._means_level_dictionary > li.my_mean_item > ul > li.my_mean_item').forEach((item) => {
+        const mean = getText(item.querySelector('span.mean[lang="ko"]'));
+        if (mean && !seenFallback.has(mean)) {
+          seenFallback.add(mean);
+          meanings.push((CIRCLED[meanings.length] ?? `${meanings.length + 1}.`) + mean);
+        }
       });
     }
     result.meaning = clean(meanings.join(', '));
